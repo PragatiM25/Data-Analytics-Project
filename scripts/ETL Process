@@ -5,7 +5,7 @@
    it will duplicates the data and doubled it
    if this happens then do truncate and the load again
 
-   This is the ETL Process using 'STORED PROCEDURE' start with 'begin' and ends with 'end'
+   This is the ETL Process using 'STORED PROCEDURE' 'create or alter procedure bronze.load_bronze as' 'begin' and ends with 'end'
 
    Stored Procedure :
             this isused while ETL for automation process
@@ -13,7 +13,8 @@
             for to save the time to write the same code again and again to get the newest data into tables
 
     Track ETL Duration :
-            use 'Datetime' to calculate the exact time duration of extracting data
+            use 'Datetime' to calculate the exact time duration of extraction of data 
+            we can do this for each step and also for whole batch or whole process
 
 
     Error Handling  :
