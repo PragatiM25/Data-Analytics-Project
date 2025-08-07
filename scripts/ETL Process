@@ -1,1 +1,179 @@
+/*============================================================================================
 
+   Inserting the data in bulk 
+   dont run this bulk insert command again 
+   it will duplicates the data and doubled it
+   if this happens then do truncate and the load again
+
+   This is the ETL Process using 'STORED PROCEDURE' start with 'begin' and ends with 'end'
+
+   Stored Procedure :
+            this isused while ETL for automation process
+            like extracting the newest data into the database tables
+            for to save the time to write the same code again and again to get the newest data into tables
+
+    Track ETL Duration :
+            use 'Datetime' to calculate the exact time duration of extracting data
+
+
+    Error Handling  :
+            In this we have also hadled the error if any error found
+            it starts with 'begin try' and 'end try'
+            the sql load the data from under the 'begin try' and 'end try'
+            if there is any error found it goes to 'begin catch' and 'end catch' 
+            where we added the how sql handle and shows the error msg
+
+    create logs in between 'begin catch' and 'end catch' :
+            Log file can also created to measure the errors like where the errors are 
+            and at what time the errors appeared and so on
+            in this session log file has not been created
+
+============================================================================================*/
+
+
+create or alter procedure bronze.load_bronze as
+begin
+
+    declare @start_time datetime, @end_time datetime, @batch_start_time datetime, @batch_end_time datetime ;
+    
+    begin try
+        set @batch_start_time = getdate();
+        print '--------------------------------------------------------';
+        print 'Loadig CRM Tables';
+        print '--------------------------------------------------------';
+
+        set @start_time = getdate();
+        print '>>Truncating Table bronze.crm_cust_info';
+        truncate table bronze.crm_cust_info;
+
+        print '>>Inserting Data into bronze.crm_cust_info';
+        bulk insert bronze.crm_cust_info
+        from 'C:\Users\DELL\Desktop\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
+        with (
+               firstrow = 2,
+               fieldterminator = ',',
+               tablock
+             ); 
+        select count(*) from bronze.crm_cust_info;
+        set @end_time = getdate();
+        print 'Load Duration : '+ cast(datediff(second, @start_time, @end_time)as varchar) + 'seconds';
+        print '==============================================================';
+
+
+
+
+        set @start_time = getdate();
+        print '>>Truncating Table bronze.crm_cust_info';
+        truncate table bronze.crm_prd_info;
+
+        print '>>Inserting Data into bronze.crm_prd_info';
+        bulk insert bronze.crm_prd_info
+        from 'C:\Users\DELL\Desktop\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
+        with (
+                firstrow = 2,
+                fieldterminator = ',',
+                tablock
+            );
+        select count(*) from bronze.crm_prd_info;
+        set @end_time = getdate();
+        print 'Load Duration : '+ cast(datediff(second, @start_time, @end_time)as varchar) + 'seconds';
+         print '==============================================================';
+
+
+
+        set @start_time = getdate();
+        print '>>Truncating Table bronze.crm_sales_details';
+        truncate table bronze.crm_sales_details;
+
+        print '>>Inserting Data into bronze.crm_sales_details';
+        bulk insert bronze.crm_sales_details
+        from 'C:\Users\DELL\Desktop\sql-data-warehouse-project\datasets\source_crm\sales_details.csv'
+        with (
+                firstrow = 2,
+                fieldterminator =',',
+                tablock
+        );
+        select count(*) from bronze.crm_sales_details;
+        set @end_time = getdate();
+        print 'Load Duration : '+ cast(datediff(second, @start_time, @end_time)as varchar) + 'seconds';
+        print '==============================================================';
+
+
+        print '--------------------------------------------------------';
+        print 'Loadig ERP Tables';
+        print '--------------------------------------------------------';
+        
+
+
+        set @start_time = getdate();
+        print '>>Truncating Table bronze.erp_cust_az12';
+        truncate table bronze.erp_cust_az12;
+
+        print '>>Inserting Data into bronze.erp_cust_az12';
+        bulk insert bronze.erp_cust_az12
+        from 'C:\Users\DELL\Desktop\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv'
+        with (
+                firstrow = 2,
+                fieldterminator =',',
+                tablock
+                );
+        select count(*) from bronze.erp_cust_az12;
+        set @end_time = getdate();
+        print 'Load Duration : '+ cast(datediff(second, @start_time, @end_time)as varchar) + 'seconds';
+         print '==============================================================';
+
+
+
+        set @start_time = getdate();
+        print '>>Truncating Table bronze.erp_loc_A101';
+        truncate table bronze.erp_loc_A101;
+
+        print '>>Inserting Data into bronze.erp_loc_A101';
+        bulk insert bronze.erp_loc_A101
+        from 'C:\Users\DELL\Desktop\sql-data-warehouse-project\datasets\source_erp\LOC_A101.csv'
+        with (
+                firstrow = 2,
+                fieldterminator =',',
+                tablock
+                );
+        select count(*) from bronze.erp_loc_A101;
+        set @end_time = getdate();
+        print 'Load Duration : '+ cast(datediff(second, @start_time, @end_time)as varchar) + 'seconds';
+         print '==============================================================';
+
+
+
+
+        set @start_time = getdate();
+        print '>>Truncating Table bronze.erp_px_cat_g1v2';
+        truncate table bronze.erp_px_cat_g1v2;
+
+        print '>>Inserting Data into bronze.erp_px_cat_g1v2';
+        bulk insert bronze.erp_px_cat_g1v2
+        from 'C:\Users\DELL\Desktop\sql-data-warehouse-project\datasets\source_erp\PX_CAT_G1V2.csv'
+        with (
+                firstrow = 2,
+                fieldterminator =',',
+                tablock
+                );
+        select count(*) from bronze.erp_px_cat_g1v2;
+        set @end_time = getdate();
+        print 'Load Duration : '+ cast(datediff(second, @start_time, @end_time)as varchar) + 'seconds';
+        print '==============================================================';
+
+        set @batch_end_time = getdate();
+        print '?????????????????????????????????????????'
+        print 'Loading Bronze Layer is Completed'
+        print '  - Load Duration : '+ cast(datediff(second, @batch_start_time, @batch_end_time)as varchar) + 'seconds';
+        print '?????????????????????????????????????????'
+
+
+    end try
+    begin catch
+        print '======================================='
+        print 'Error Occured during loading Bronze Layer'
+        print 'Error Message' + error_message();
+        print 'Error Message' + cast(error_number() as varchar);
+        print '======================================='
+    end catch
+end
