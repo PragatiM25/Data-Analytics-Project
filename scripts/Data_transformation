@@ -1,4 +1,6 @@
-/*In this stage we already created other tables where we are copying the content from bronze tables into silver table
+/*
+----------------- this stage is after DDL scripting ----------------
+In this stage we already created other tables where we are copying the content from bronze tables into silver table
 but in very cleaned format transforming bad quality data into readable format
 
 a) first check if the id is unique and nut null and remove the duplicates
@@ -7,6 +9,8 @@ c) check other columns value using distinct if there used any abbreviation chang
 d) check if the date column is real date if it is character or anything else then change its datatype
 */
 
+
+-- inserted transformed data from bronze to silver--
 
 insert into silver.crm_cust_info (
 	cst_id,
@@ -40,3 +44,33 @@ from
 		from bronze.crm_cust_info
 		)t
 		where rnk=1 and cst_id is not null;
+
+
+
+-- inserted transformed data from bronze to silver--
+
+insert into silver.crm_prd_info (
+	prd_id,
+	cat_id,
+	prd_key,
+	prd_nm,
+	prd_cost,
+	prd_line,
+	prd_start_dt,
+	prd_end_dt
+)
+select prd_id,
+	   replace (substring(prd_key,1,5),'-','_') as cat_id,
+	   substring(prd_key,7,len(prd_key)) as prd_key,
+	   prd_nm,
+	   coalesce(prd_cost,0) as prd_cost,
+	   case upper(trim(prd_line))
+			when 'M' then 'mountain'
+			when 'R' then 'road'
+			when 'S' then 'other sales'
+			when 'T' then 'touring'
+	        else 'n/a'
+	   end as prd_line,
+	   cast(prd_start_dt as date)as prd_start_dt ,
+	   lead(prd_start_dt)over (partition by prd_key order by prd_start_dt)as prd_end_dt
+from bronze.crm_prd_info;
