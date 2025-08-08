@@ -1,0 +1,42 @@
+/*In this stage we already created other tables where we are copying the content from bronze tables into silver table
+but in very cleaned format transforming bad quality data into readable format
+
+a) first check if the id is unique and nut null and remove the duplicates
+b) check the blank spaces
+c) check other columns value using distinct if there used any abbreviation change it using case
+d) check if the date column is real date if it is character or anything else then change its datatype
+*/
+
+
+insert into silver.crm_cust_info (
+	cst_id,
+    cst_key,
+	cst_firstname,
+	cst_lastname,
+	cst_marital_status,
+	cst_gndr,
+	cst_create_date
+)
+
+select
+cst_id,
+cst_key,
+trim(cst_firstname)as cst_firstname ,
+trim(cst_lastname)as cst_lastname,
+case when upper(trim(cst_marital_status))='S' then 'single'
+	 when upper(trim(cst_marital_status))='M' then 'married'
+	 else 'unknown'
+end as cst_marital_status,
+case when upper(trim(cst_gndr))='F' then 'female'
+	 when upper(trim(cst_gndr))='M' then 'male'
+	 else 'unknown'
+end as cst_gndr,
+cst_create_date
+from
+		(
+		select 
+		*,
+		row_number() over(partition by cst_id order by cst_create_date desc) as rnk
+		from bronze.crm_cust_info
+		)t
+		where rnk=1 and cst_id is not null;
