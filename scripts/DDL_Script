@@ -20,13 +20,15 @@ create table silver.crm_cust_info(
 
 drop table silver.crm_prd_info;
 create table silver.crm_prd_info(
-        prd_id int,
-        prd_key	varchar(50),
-        prd_nm	varchar(50),
-        prd_cost int,
-        prd_line varchar(50),	
-        prd_start_dt date,
-        prd_end_dt date
+      prd_id  int,
+      cat_id  varchar,
+      prd_key varchar,
+      prd_nm  varchar,
+      prd_cost  int,
+      prd_line  varchar,
+      prd_start_dt  date,
+      prd_end_dt date,
+      dp_create_date datetime default getdate()
 );
 
 
