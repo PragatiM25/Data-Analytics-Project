@@ -1,0 +1,57 @@
+select * from bronze.crm_sales_details
+
+--made it sls_order_dt
+
+ select
+        case 
+            when sls_order_dt <=0 then null
+            when len(sls_order_dt)!=8 then null
+            else cast(cast(sls_order_dt as varchar(50)) as date)
+        end as sls_order_dt
+from bronze.crm_sales_details
+
+
+--go for sls_shp_dt
+
+select cast(cast(sls_ship_dt as varchar (50))as date) as sls_ship_dt
+from bronze.crm_sales_details
+
+-- go for sls_due_dt
+
+select cast(cast(sls_due_dt as varchar(50)) as date) as sls_due_dt
+from bronze.crm_sales_details
+
+
+
+-- lets check fthe order dt is greater than the shpping date and ship date is gratert han due date
+
+select * from bronze.crm_sales_details
+where sls_order_dt>sls_ship_dt or sls_ship_dt>sls_due_dt
+
+
+-- now lets check where the price * quantity = sales or not
+
+select
+sls_sales as old_sales,
+sls_quantity,
+sls_price as old_price,
+
+case when sls_sales is null or sls_sales<=0 or sls_sales!=  sls_quantity * abs(sls_price) then sls_quantity*abs(sls_price)
+     else sls_sales
+end as sls_sales,
+
+sls_quantity,
+
+case when sls_price is null or sls_price<=0  then abs(sls_sales)/sls_quantity
+     else sls_price
+end as sls_price
+
+from bronze.crm_sales_details
+where sls_price * sls_quantity != sls_sales
+or sls_sales is null or sls_quantity is null or sls_price is null
+or sls_sales<=0 or sls_quantity<=0 or sls_price<=0
+order by sls_sales 
+
+
+
+
