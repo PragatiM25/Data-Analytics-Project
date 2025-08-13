@@ -1,7 +1,7 @@
 /*
 Ths sthe DDL script to create bronze and silver tables this is for silver layer 
 same thing goes with bronze 
-remember one thing whatever youchange in columns like youadded columns or you remove column 
+remember one thing whatever you change in columns like you added columns or you remove column  or you change datatype
 make sure to change the DDL script and run again
 */
 
@@ -37,9 +37,9 @@ create table silver.crm_sales_details(
         sls_ord_num	varchar(50),
         sls_prd_key	varchar(50),
         sls_cust_id	int,
-        sls_order_dt int,	
-        sls_ship_dt	int,
-        sls_due_dt	int,
+        sls_order_dt    date,	
+        sls_ship_dt	date,
+        sls_due_dt	date,
         sls_sales	int,
         sls_quantity int,
         sls_price int
