@@ -1,7 +1,8 @@
 /*
 ----------------- this stage is after DDL scripting ----------------
-In this stage we already created other tables where we are copying the content from bronze tables into silver table
-but in very cleaned format transforming bad quality data into readable format
+In this stage we already created other tables where we are copying the content 
+from bronze tables into silver table but in very cleaned format transforming 
+bad quality data into readable format
 
 a) first check if the id is unique and nut null and remove the duplicates
 b) check the blank spaces
@@ -10,7 +11,8 @@ d) check if the date column is real date if it is character or anything else the
 */
 
 
--- inserted transformed data from bronze.crm_cust_info to silver.crm_cust_info--
+-- INSERTED TRANSFORMED DATA FROM BRONZE.CRM_CUST_INFO TO SILVER.CRM_CUST_INFO --
+truncate table silver.crm_cust_info;
 
 insert into silver.crm_cust_info (
 	cst_id,
@@ -43,11 +45,12 @@ from
 		row_number() over(partition by cst_id order by cst_create_date desc) as rnk
 		from bronze.crm_cust_info
 		)t
-		where rnk=1 and cst_id is not null;
+		where rnk=1 and cst_id is not null ;
 
 
 
--- inserted transformed data from bronze.crm_prd_info  to silver.crm_prd_info --
+-- INSERTED TRANSFORMED DATA FROM BRONZE.CRM_PRD_INFO TO SILVER.CRM_PRD_INFO --
+truncate table silver.crm_prd_info;
 
 insert into silver.crm_prd_info 
 (
@@ -76,7 +79,10 @@ select prd_id,
 	   lead(prd_start_dt)over (partition by prd_key order by prd_start_dt)as prd_end_dt
 from bronze.crm_prd_info;
 
--- inserted transformed data from bronze.crm_sales_Details to silver.crm_sales_Details--
+
+-- INSERTED TRANSFORMED DATA FROM BRONZE.CRM_SALES_DETAILS TO SILVER.CRM_SALES_DETAILS --
+
+truncate table silver.crm_sales_details;
 
 insert into silver.crm_sales_details
 (
@@ -127,8 +133,9 @@ from bronze.crm_sales_details
 
 
 
--- inserted transformed data from bronze to silver.erp_cust_az12 --
+-- INSERTED TRANSFORMED DATA FROM BRONZE TO SILVER.ERP_CUST_AZ12 --
 
+truncate table silver.erp_cust_az12;
 
 insert into silver.erp_cust_az12
 (
@@ -150,4 +157,45 @@ insert into silver.erp_cust_az12
 			when upper(trim(gen)) in ('F', 'FEMALE','female') then 'Female'
 			else 'n/a'
 	    end as gen
-from bronze.erp_cust_az12 
+from bronze.erp_cust_az12 ;
+
+
+
+-- INSERTED TRANSFORMED DATA FROM BRONZE TO SILVER.ERP_LOC_A101 --
+
+truncate table silver.erp_loc_A101;
+
+insert into silver.erp_loc_A101
+(
+  cid,
+  cntry
+)
+  select 
+		replace (cid,'-','') as cid,
+		case 
+			when trim(cntry)='DE' then 'Germany'
+			when trim(cntry) in ('US','USA') then 'United States'
+			when trim (cntry) ='' or trim (cntry) is null then 'n/a'
+			else trim(cntry) 
+		end as cntry
+  from bronze.erp_loc_A101;
+
+
+
+-- INSERTED TRANSFORMED DATA FROM BRONZE TO SILVER.ERP_PX_CAT_G1V2 (NOTHING TO CHANGE) --
+
+truncate table silver.erp_px_cat_g1v2;
+
+insert into silver.erp_px_cat_g1v2
+(
+ id,
+ cat,
+ subcat,
+ maintenance
+)
+	select 
+		 id,
+		 cat,
+		 subcat,
+		 maintenance
+		from bronze.erp_px_cat_g1v2;
