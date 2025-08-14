@@ -8,11 +8,6 @@ from bronze.erp_loc_A101
 
 --DATA STANDARDIZATION AND CUSTOMIZATION
 
-select distinct trim(cntry)as cntry from bronze.erp_loc_A101 order by  cntry
-where cntry =' ' or cntry is null or cntry!=trim(cntry)
-
-
-
 select 
 distinct case 
 	when trim(cntry)='DE' then 'Germany'
