@@ -1,0 +1,34 @@
+select * from bronze.erp_cust_az12
+where cid like 'NAS%'
+
+--lets check cid
+
+select
+	case 
+		when cid like 'NAS%' then trim(substring(cid,4,len(cid)))
+		else cid
+	 end as cid
+from bronze.erp_cust_az12
+
+
+--lets check bdate
+
+select 
+bdate,
+	 case 
+		when bdate > getdate() then null
+		else bdate
+	end as bdate2
+from bronze.erp_cust_az12
+where bdate>getdate() or bdate =' '
+
+--lets check gender
+
+select 
+gen,
+case when upper(trim(gen)) in ('M','MALE','male') then 'Male'
+	 when upper(trim(gen)) in ('F', 'FEMALE','female') then 'Female'
+	 else 'n/a'
+end as gen2
+from bronze.erp_cust_az12
+where gen is null
