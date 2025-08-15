@@ -1,0 +1,71 @@
+create view gold.dim_customers as
+select 
+		row_number ()over(order by cst_id) as cust_key, --surrogate primary key 
+		ci.cst_id as cust_id,
+		ci.cst_key as cust_number,
+		ci.cst_firstname as first_name,
+		ci.cst_lastname as last_name,
+		case 
+		   	 when ci.cst_gndr!='n/a' then ci.cst_gndr
+			 else coalesce(ca.gen,'n/a')
+		end as gender,
+		lo.cntry as country,
+		ci.cst_marital_status as marital_status,
+		ca.bdate as birth_date,
+		ci.cst_create_date as create_date
+
+from silver.crm_cust_info ci
+left join silver.erp_cust_az12 ca on ci.cst_key = ca.cid
+left join silver.erp_loc_a101 lo on ci.cst_key = lo.cid
+
+
+--====================================================================================================
+create view gold.dim_products as
+select 
+row_number()over(order by pn.prd_start_dt, pn.prd_key) as product_key, --surrogate primary key 
+		pn.prd_id,
+		pn.prd_key as prd_number,
+		pn.prd_nm as prd_name,
+		pn.cat_id,
+		pc.cat as prd_categories,
+		pc.subcat as prd_subcategories,
+		pc.maintenance,
+		pn.prd_cost,
+		pn.prd_line,
+		pn.prd_start_dt as prd_start_date
+		
+	from silver.crm_prd_info pn
+	left join silver.erp_px_cat_g1v2 pc on pn.cat_id= pc.id
+	where pn.prd_end_dt is null --filter all historic data withlatest prd_end_dt which is not close
+
+--================================================================================================
+
+create view gold.fact_sales as
+select 
+	  sd.sls_ord_num as order_number,
+	  prd.product_key,
+	  cu.cust_key,
+	  sd.sls_order_dt as order_date,
+	  sd.sls_ship_dt as ship_date,
+	  sd.sls_due_dt as due_date,
+	  sd.sls_sales as total_sales,
+	  sd.sls_quantity,
+	  sd.sls_price
+ 
+from silver.crm_sales_details sd
+
+left join gold.dim_products prd 
+on sd.sls_prd_key =prd.prd_number
+left join gold.dim_customers cu 
+on sd.sls_cust_id = cu.cust_id
+
+
+
+--------------FACT CHECKING ABOUT THE JOINING IF THERE IS ANY NULLS---------------
+
+select * from gold.fact_sales f
+left join gold.dim_customers c
+on f.cust_key = c.cust_key
+left join gold.dim_products prd
+on f.product_key = prd.product_key
+where c.cust_key is null
