@@ -1,0 +1,33 @@
+--EXPLORE ALL OBJECTS IN THE DATABASE--
+select * from information_schema.tables
+
+
+--EXPLORE ALL COLUMNS IN THE DATABASE--
+select * from information_schema.columns
+where TABLE_NAME ='dim_customers'
+
+
+-- EXPLORE ALL COUNTRIES OUR CUSTOMERS COME FROM--
+select distinct country from gold.dim_customers
+
+-- EXPLORE ALL CATEGORIES OUR CUSTOMERS DEVIDED--
+select distinct prd_categories, prd_subcategories,prd_name from gold.dim_products
+order by 1,2,3
+
+-- EXPLORE THE DATESPAN WHICH IS THE EARLIEST DATE AND LATEST DATE AND THE TIMESTAMP OF THE DATA--
+select 
+		min(order_date) first_order,
+		max(order_date)last_order,
+		datediff(year,min(order_Date),max(order_date)) years,
+		datediff(month,min(order_Date),max(order_date)) months
+from gold.fact_sales
+
+
+--EXPLORE THE OLDEST AND THE YOUNGEST CUSTOMER--
+
+select 
+		min(birth_date) oldest_birth_Date,
+		datediff(year,min(birth_Date),getdate()) oldest_age,
+		max(birth_date) youngest_birth_date,
+		datediff(year,max(birth_Date),getdate()) yongest_age
+from gold.dim_customers
