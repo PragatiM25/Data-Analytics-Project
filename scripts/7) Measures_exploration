@@ -179,3 +179,85 @@ select * from
 		group by p.product_name
 )t
 where rank_products<=5
+
+
+
+-- CHECK TOP 5 BEST SUBCATEGORIES IN TERMS OF SALES
+
+
+select top 5
+	    p.subcategories,
+		sum(s.total_sales) as total_revenue
+from gold.fact_sales s
+left join gold.dim_products p
+on p.product_key = s.product_key
+group by p.subcategories
+order by total_revenue desc
+
+-- CHECK TOP 5 BEST SUBCATEGORIES IN TERMS OF SALES (usng window function)
+
+select * from
+(
+		select 
+				subcategories,
+				sum(total_sales) as sales,
+				dense_rank()over(order by sum(total_sales)desc) as rnk
+		from gold.fact_sales s
+		left join gold.dim_products p
+		on s.product_key=p.product_key
+		group by subcategories
+)t
+where rnk<=5
+
+
+-- FIND THE TOP 10 CUSTOMERS GENERATED HIGHEST REVENUE 
+select top 10
+		c.customer_key,
+		c.first_name,
+		c.last_name,
+		sum(s.total_sales) as sales
+from gold.fact_sales s
+left join gold.dim_customers c
+on s.customer_key = c.customer_key
+group by c.customer_key,
+		 c.first_name,
+		 c.last_name
+order by sales desc
+
+
+-- FIND THE TOP 3 CUSTOMERS with fewest order
+
+select 
+		c.customer_key,
+		c.first_name,
+		c.last_name,
+		count(distinct order_number) as total_orders
+from gold.fact_sales s
+left join gold.dim_customers c
+on s.customer_key = c.customer_key
+group by c.customer_key,
+		 c.first_name,
+		 c.last_name
+order by total_orders 
+
+
+-- FIND THE MALE CUSTOMERS WHO HAVE PLACED ONLY 2 ORDERS     
+
+select 
+		c.customer_key,
+		c.first_name,
+		c.last_name,
+		c.gender,
+		count(distinct order_number) as total_orders
+from gold.fact_sales s
+left join gold.dim_customers c
+on s.customer_key = c.customer_key
+where gender = 'Male'
+group by c.customer_key,
+		 c.first_name,
+		 c.last_name,
+		 c.gender
+having count( distinct order_number)=2
+order by total_orders 
+
+
