@@ -11,7 +11,7 @@ where TABLE_NAME ='dim_customers'
 select distinct country from gold.dim_customers
 
 -- EXPLORE ALL CATEGORIES OUR CUSTOMERS DEVIDED--
-select distinct prd_categories, prd_subcategories,prd_name from gold.dim_products
+select distinct categories, subcategories,product_name from gold.dim_products
 order by 1,2,3
 
 -- EXPLORE THE DATESPAN WHICH IS THE EARLIEST DATE AND LATEST DATE AND THE TIMESTAMP OF THE DATA--
