@@ -1,0 +1,36 @@
+/*--ANALYZE THE YEARLY PERFORMANCE OF PRODUCTS BY COMPARING 
+EACH PRODUCTS SALES TO BOTH ITS AVERAGE SALES PERORMANCE AND THE PREVIOUS YEARS SALES
+*/
+
+with yearly_performance as
+(
+	select 
+	year(s.order_date) as order_date,
+	p.product_name,
+	sum(s.total_sales) as current_sales
+	from gold.fact_sales s
+	left join gold.dim_products p
+	on s.product_key=p.product_key
+	where order_date is not null
+	group by p.product_name,year(s.order_date)
+)
+select
+		order_date,
+		product_name,
+		current_sales,
+		avg(current_sales) over(partition by product_name) as average_sales,
+		current_sales - avg(current_sales) over(partition by product_name) as Sales_Performance,
+		case
+			when current_sales - avg(current_sales) over(partition by product_name)<0 then 'Poor Sales'
+			when current_sales - avg(current_sales) over(partition by product_name)>0 then 'Positive Sales'
+			else 'Average_Sales'
+		end as Remark,
+
+		coalesce(lag(current_sales)over (partition by product_name order by order_date),0) as Previous_sales_by_products,
+		current_sales - coalesce(lag(current_sales)over (partition by product_name order by order_date),0) as variance,
+		case
+			when current_sales - lag(current_sales)over (partition by product_name order by order_date)<0 then 'Poor Sales'
+			when current_sales - lag(current_sales)over (partition by product_name order by order_date)>0 then 'Positive Sales'
+			else 'First_year_Sales'
+		end as Remark
+from yearly_performance
