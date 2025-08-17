@@ -1,0 +1,93 @@
+-- CHANGES OVER TIME SALES DATA BY MONTH 
+select
+  	datetrunc(month,order_date),
+  	sum(total_sales) as total_sales,
+  	count (distinct customer_key) as total_customer,
+  	sum(quantity) as quantity_order
+from gold.fact_sales
+where order_date is not null
+group by datetrunc (month,order_date)
+order by datetrunc (month,order_date);
+
+
+
+-- CHANGES OVER TIME SALES DATA BY YEAR ON YEAR
+select
+  	year(order_date),
+  	sum(total_sales) as total_sales,
+  	count (distinct customer_key) as total_customer,
+  	sum(quantity) as quantity_order
+from gold.fact_sales
+where order_date is not null
+group by year (order_date)
+order by year(order_date)
+
+
+-- CHANGES OVER TIME SALES DATA BY YOUR OWN FORMAT OF YEAR AND MONTH
+-- BUT IN THIS WAY THE DATE COLUMN BECOMES STRING NOT THE DATE AS INTEGER 
+-- THE DATETRUNC FUNCTION WORKS BETTER IN THIS CASE TO HANDLE ORDER OF DATE 
+select
+  	format(order_date,'yyyy-MMM'),
+  	sum(total_sales) as total_sales,
+  	count (distinct customer_key) as total_customer,
+  	sum(quantity) as quantity_order
+from gold.fact_sales
+where order_date is not null
+group by format(order_date,'yyyy-MMM')
+order by format(order_date,'yyyy-MMM')
+
+
+-- CUMMULATIVE ANALYSIS "RUNNNG TOTAL" (HOW THE BUSINESS IS GROWING OR DECLINING OVER THE TIME MONTH)
+
+select 
+order_date,
+total_Sales,
+sum(total_sales) over (order by order_date) --without partitioning the order_date window by month or year
+from
+(
+	select
+		datetrunc(month,order_date) as order_date,
+		sum(total_sales) as total_sales
+	from gold.fact_sales
+	where datetrunc(month,order_date) is not null
+	group by datetrunc(month,order_date)
+)t
+
+
+
+-- CUMMULATIVE ANALYSIS "RUNNNG TOTAL" (HOW THE BUSINESS IS GROWING OR DECLINING OVER THE TIME MONTH)
+
+
+
+select
+	order_Date,
+	total_sales,
+	sum(total_sales)over(partition by datetrunc(year,order_date) order by order_date) as running_total_sales
+from 
+(
+		select
+			datetrunc(month,order_date) as order_date,
+			sum(total_sales) as total_sales
+		from gold.fact_sales
+		where datetrunc(month,order_date) is not null
+		group by datetrunc(month,order_date)
+
+)t
+
+
+
+-- COMMULATIVE ANALYSIS "MOVING AVERAGE"
+
+select
+	order_date,
+	average_price,
+	avg(average_price) over(order by order_date)as moving_average_price
+from 
+	(
+		select 
+			datetrunc(YEAR,order_date)as order_date,
+			avg(price) as average_price
+		from gold.fact_sales
+		where order_date is not null
+		group by datetrunc(year,order_date)
+	)t
