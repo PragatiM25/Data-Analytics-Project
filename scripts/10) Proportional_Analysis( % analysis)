@@ -1,0 +1,25 @@
+/*
+
+--ANALYZE THE YEARLY PERFORMANCE OF PRODUCTS BY PERCENTAGE WE CAN SAY PROPORTIONAL ANALYSIs
+
+*/
+
+with yearly_performance as
+(
+	select 
+	p.categories,
+	sum(s.total_sales) as total_sales
+	from gold.fact_sales s
+	left join gold.dim_products p
+	on s.product_key=p.product_key
+	group by p.categories
+)
+    select
+    categories,
+    total_sales,
+    sum(total_sales)over()as overall_sales,
+    
+    concat (round (cast (total_sales as float) / sum(total_sales)over() * 100 , 2), '%') as percentages
+
+from yearly_performance
+order by percentages desc
