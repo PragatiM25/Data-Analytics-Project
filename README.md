@@ -27,7 +27,7 @@ This project focuses on transforming a raw dataset into a clean, structured form
 - Automated ETL pipeline that processes data in under **30 seconds**.
 - Identified key business trends that could improve decision-making by **15–20%**.
 
-## 🔗 Live Dashboard / Portfolio
+## 🔗 Live Dashboard
 
 - Tableau Dashboard : https://public.tableau.com/app/profile/pragati.meshram/vizzes
 
@@ -39,7 +39,6 @@ I’m Pragati Meshram, an aspiring data analyst with an MBA in Business Analytic
 
 - 📧 Email: pragatimeshram112@example.com
 - 💼 LinkedIn: https://linkedin.com/in/pragati-meshram
-- 🗂️ Portfolio:
 
 ---
 
